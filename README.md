@@ -1,6 +1,6 @@
-# Ping Pong (Arduino Nano)
+# Flappy Bird (Arduino Nano)
 
-2 Spieler Ping Pong am Arduino Nano auf einem OLED Display, wobei man entweder mit knöpfen direkt ober über Roboremo am Handy mit bluetooth spielen kann. Außerdem ein LED-Streifen der entweder blau oder rot leuchtet je nachdem welcher Spieler gewonnen hat.
+Flappy Bird am Arduino Nano auf einem OLED Display, wobei man entweder mit knöpfen direkt ober über Roboremo am Handy mit bluetooth spielen kann.
 
 ## Todos
 
