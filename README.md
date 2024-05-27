@@ -1,6 +1,6 @@
 # Nano Bird
 
-Flappy Bird am Arduino Nano auf einem OLED Display, wobei man entweder mit knöpfen direkt ober über Roboremo am Handy mit bluetooth spielen kann.
+Flappy Bird am Arduino Nano auf einem OLED Display, wobei man entweder mit knöpfen direkt oder über Roboremo am Handy mit bluetooth spielen kann. Led Streifen der auf events im Spiel reagiert.
 
 ## Todos
 
