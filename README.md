@@ -13,7 +13,7 @@
 - Arduino Nano
 - Led LED-Streifen
 - OLED Display
-- 2 Buttons
+- 2 Buttons mit 10k Widerständen
 - HC-05 Modul
 - Android Handy mit Roboremo
 - Kabel, Steckbrett, ...
