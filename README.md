@@ -1,4 +1,4 @@
-# Flappy Bird (Arduino Nano)
+# Nano Bird
 
 Flappy Bird am Arduino Nano auf einem OLED Display, wobei man entweder mit knöpfen direkt ober über Roboremo am Handy mit bluetooth spielen kann.
 
