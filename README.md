@@ -2,6 +2,12 @@
 
 2 Spieler Ping Pong am Arduino Nano auf einem OLED Display, wobei man entweder mit knöpfen direkt ober über Roboremo am Handy mit bluetooth spielen kann. Außerdem ein LED-Streifen der entweder blau oder rot leuchtet je nachdem welcher Spieler gewonnen hat.
 
+## Todos
+
+- [x] Schaltung
+- [ ] Program schreiben & testen
+- [ ] Dokumentation
+
 ## Hardware
 
 - Arduino Nano
@@ -14,8 +20,6 @@
 
 ## Schaltung
 
-![schaltung](./assets/schaltung.jpg) 
+![schaltung](./assets/schaltung.jpg)
 
-## Dokumentation
-
-> Todo
+(LED-Streifen fehlt noch)
