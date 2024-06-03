@@ -3,6 +3,7 @@
 #include "HardwareSerial.h"
 #include "SoftwareSerial.h"
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <SPI.h>
 #include <Wire.h>
 
@@ -23,35 +24,47 @@ float btValue;
 Signal btQuery();
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(10, 13, NEO_GRB + NEO_KHZ800);
-
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
-void text(int x, int y, String txt);
+void text(int y, String txt);
 void wipe();
 void initalize();
 
-int game_state = 1;
-int score = 0;
-int high_score = 0;
-int bird_x = (int)display.width() / 4;
-int bird_y;
-int speed = 0;
+int state = 2; // 0 = game, 1 = game over, 2 = title
+int score;
+int high_score;
 
 #define SPRITE_HEIGHT 16
 #define SPRITE_WIDTH 16
-static const unsigned char PROGMEM wing_down_bmp[] = {
+static const unsigned char PROGMEM wing_down[] = {
     B00000000, B00000000, B00000000, B00000000, B00000011, B11000000, B00011111,
     B11110000, B00111111, B00111000, B01111111, B11111110, B11111111, B11000001,
     B11011111, B01111110, B11011111, B01111000, B11011111, B01111000, B11001110,
     B01111000, B11110001, B11110000, B01111111, B11100000, B00111111, B11000000,
     B00000111, B00000000, B00000000, B00000000,
 };
-static const unsigned char PROGMEM wing_up_bmp[] = {
+static const unsigned char PROGMEM wing_up[] = {
     B00000000, B00000000, B00000000, B00000000, B00000011, B11000000, B00011111,
     B11110000, B00111111, B00111000, B01110001, B11111110, B11101110, B11000001,
     B11011111, B01111110, B11011111, B01111000, B11111111, B11111000, B11111111,
     B11111000, B11111111, B11110000, B01111111, B11100000, B00111111, B11000000,
     B00000111, B00000000, B00000000, B00000000,
 };
+
+struct bird {
+    int x;
+    int y;
+    int speed;
+};
+bird bird;
+
+struct wall {
+    int x;
+    int y;
+};
+wall wall[2];
+const int wall_gap = 40;
+const int wall_width = 10;
+
 
 void setup() {
     bt.begin(9600);
@@ -60,56 +73,94 @@ void setup() {
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
     display.setTextColor(WHITE);
     display.clearDisplay();
+    initalize();
     Serial.println("Started");
 }
 
 void loop() {
-    if (game_state == 0) {
+    if (state == 0) {
         display.clearDisplay();
 
         if (digitalRead(bPin) == LOW) {
-            speed += 4;
+            bird.speed += 4;
         } else {
-            speed -= 2;
+            bird.speed -= 2;
         }
 
-        speed = constrain(speed, -8, 8);
-        bird_y += speed;
+        bird.speed = constrain(bird.speed, -8, 8);
+        bird.y += bird.speed;
 
-        if (bird_y < 0) {
-            bird_y = 0;
+        if (bird.y < 0) {
+            bird.y = 0;
         }
-        if (bird_y > display.height() - SPRITE_HEIGHT) {
-            bird_y = display.height() - SPRITE_HEIGHT;
+        if (bird.y > display.height() - SPRITE_HEIGHT) {
+            bird.y = display.height() - SPRITE_HEIGHT;
         }
 
-        if (speed < 0) {
-            display.drawBitmap(bird_x, bird_y, wing_down_bmp, 16, 16, WHITE);
+        if (bird.speed < 0) {
+            display.drawBitmap(bird.x, bird.y, wing_down, 16, 16,
+                               WHITE);
         } else {
-            display.drawBitmap(bird_x, bird_y, wing_up_bmp, 16, 16, WHITE);
+            display.drawBitmap(bird.x, bird.y, wing_up, 16, 16, WHITE);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            display.fillRect(wall[i].x, 0, wall_width, wall[i].y, WHITE);
+
+            display.fillRect(wall[i].x, wall[i].y + wall_gap, wall_width,
+                             display.height() - wall[i].y + wall_gap, WHITE);
+
+            if (wall[i].x < 0) {
+                wall[i].y = random(0, display.height() - wall_gap);
+                wall[i].x = display.width();
+            }
+
+            if (wall[i].x == bird.x) {
+                score++;
+            }
+
+            if ((bird.x + SPRITE_WIDTH > wall[i].x &&
+                 bird.x < wall[i].x + wall_width) &&
+                (bird.y < wall[i].y ||
+                 bird.y + SPRITE_HEIGHT > wall[i].y + wall_gap)) {
+                display.display();
+                delay(200);
+                state = 1;
+            }
+
+            wall[i].x -= 4;
         }
 
         display.display();
-        delay(50);
-    } else if (game_state == 1) {
+        delay(25);
+    } else if (state == 1) {
         wipe();
-        text(0, 0, "Game Over");
-        text(0, 10, "Score: " + String(score));
+        text(0, "Game Over!");
+        text(10, "Score: " + String(score));
         if (score > high_score) {
             high_score = score;
-            text(0, 20, "New High Score!");
+            EEPROM.write(0, high_score);
+            text(20, "New High Score!");
         } else {
-            text(0, 20, "High Score: " + String(high_score));
+            text(20, "High Score: " + String(high_score));
         }
         display.display();
 
         while (digitalRead(bPin) == LOW)
             ;
-
         initalize();
         while (digitalRead(bPin) == HIGH)
             ;
-        game_state = 0;
+        state = 0;
+    } else if (state == 2) {
+        text(display.height() / 2, "Nano Bird");
+        display.display();
+
+        while (digitalRead(bPin) == LOW)
+            ;
+        while (digitalRead(bPin) == HIGH)
+            ;
+        state = 0;
     }
 }
 
@@ -143,9 +194,9 @@ Signal btQuery() {
     return result;
 }
 
-void text(int x, int y, String txt) {
-    display.setCursor(x, y);
-    display.print(txt);
+void text(int y, String txt) {
+    display.setCursor((display.width() - txt.length() * 6) / 2, y);
+    display.println(txt);
 }
 
 void wipe() {
@@ -160,7 +211,12 @@ void wipe() {
 }
 
 void initalize() {
-    bird_y = (int)display.height() / 2;
-    speed = 0;
+    bird.y = (int)display.height() / 2;
+    bird.speed = 0;
     score = 0;
+    high_score = EEPROM.read(0);
+    wall[0].x = display.width();
+    wall[0].y = random(0, display.height() - wall_gap);
+    wall[1].x = display.width() + (display.width() / 2);
+    wall[1].y = random(0, display.height() - wall_gap);
 }
