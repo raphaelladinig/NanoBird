@@ -65,7 +65,6 @@ wall wall[2];
 const int wall_gap = 40;
 const int wall_width = 10;
 
-
 void setup() {
     bt.begin(9600);
     Serial.begin(9600);
@@ -78,10 +77,11 @@ void setup() {
 }
 
 void loop() {
+    Signal s = btQuery();
     if (state == 0) {
         display.clearDisplay();
 
-        if (digitalRead(bPin) == LOW) {
+        if ((s.id == 'b' && s.value == 0) || digitalRead(bPin) == LOW) {
             bird.speed += 4;
         } else {
             bird.speed -= 2;
@@ -98,8 +98,7 @@ void loop() {
         }
 
         if (bird.speed < 0) {
-            display.drawBitmap(bird.x, bird.y, wing_down, 16, 16,
-                               WHITE);
+            display.drawBitmap(bird.x, bird.y, wing_down, 16, 16, WHITE);
         } else {
             display.drawBitmap(bird.x, bird.y, wing_up, 16, 16, WHITE);
         }
@@ -211,6 +210,7 @@ void wipe() {
 }
 
 void initalize() {
+    bird.x = (int)display.width() / 2;
     bird.y = (int)display.height() / 2;
     bird.speed = 0;
     score = 0;
