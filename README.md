@@ -6,7 +6,7 @@ Flappy Bird am Arduino Nano auf einem OLED Display, wobei man entweder mit knöp
 
 - [x] Schaltung
 - [ ] Program schreiben & testen
-- [ ] Dokumentation
+- [ ] A3 Plakat
 
 ## Hardware
 
