@@ -28,11 +28,14 @@ Adafruit_SSD1306 display(128, 64, &Wire, -1);
 void text(int y, String txt);
 void wipe();
 void initalize();
+void setColor(uint32_t color);
 
 int state = 2; // 0 = game, 1 = game over, 2 = title
 int score;
 int high_score;
+unsigned long timeout = millis();
 
+// TODO: change sprite
 #define SPRITE_HEIGHT 16
 #define SPRITE_WIDTH 16
 static const unsigned char PROGMEM wing_down[] = {
@@ -79,6 +82,7 @@ void setup() {
 void loop() {
     Signal s = btQuery();
     if (state == 0) {
+        setColor(strip.Color(0, 255, 0));
         display.clearDisplay();
 
         if ((s.id == 'b' && s.value == 0) || digitalRead(bPin) == LOW) {
@@ -134,6 +138,7 @@ void loop() {
         delay(25);
     } else if (state == 1) {
         wipe();
+        setColor(strip.Color(255, 0, 0));
         text(0, "Game Over!");
         text(10, "Score: " + String(score));
         if (score > high_score) {
@@ -152,6 +157,7 @@ void loop() {
             ;
         state = 0;
     } else if (state == 2) {
+        setColor(strip.Color(0, 0, 255));
         text(display.height() / 2, "Nano Bird");
         display.display();
 
@@ -160,6 +166,10 @@ void loop() {
         while (digitalRead(bPin) == HIGH)
             ;
         state = 0;
+    }
+    if ((timeout + 50) < millis()) {
+        strip.show();
+        timeout = millis();
     }
 }
 
@@ -219,4 +229,10 @@ void initalize() {
     wall[0].y = random(0, display.height() - wall_gap);
     wall[1].x = display.width() + (display.width() / 2);
     wall[1].y = random(0, display.height() - wall_gap);
+}
+
+void setColor(uint32_t color) {
+    for (int i = 0; i < strip.numPixels(); i++) {
+        strip.setPixelColor(i, color);
+    }
 }
