@@ -20,7 +20,6 @@ int score;
 int high_score;
 unsigned long timeout = millis();
 
-// TODO: change sprite
 #define SPRITE_HEIGHT 16
 #define SPRITE_WIDTH 16
 static const unsigned char PROGMEM wing_down[] = {
