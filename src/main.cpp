@@ -51,6 +51,7 @@ struct wall {
 wall wall[2];
 const int wall_gap = 40;
 const int wall_width = 10;
+double wall_speed = 4;
 
 void setup() {
     Serial.begin(9600);
@@ -114,8 +115,9 @@ void loop() {
                 state = 1;
             }
 
-            wall[i].x -= 4;
+            wall[i].x -= wall_speed;
         }
+        wall_speed = wall_speed * 1.0001;
 
         display.display();
         delay(25);
@@ -180,6 +182,7 @@ void initalize() {
     wall[0].y = random(0, display.height() - wall_gap);
     wall[1].x = display.width() + (display.width() / 2);
     wall[1].y = random(0, display.height() - wall_gap);
+    wall_speed = 4;
 }
 
 void setColor(uint32_t color) {
@@ -187,8 +190,4 @@ void setColor(uint32_t color) {
         strip.setPixelColor(i, color);
     }
     strip.show();
-    // if ((timeout + 50) < millis()) {
-    //     strip.show();
-    //     timeout = millis();
-    // }
 }
