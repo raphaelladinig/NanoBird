@@ -16,8 +16,6 @@ Flappy Bird wird auf einem Arduino Nano gespielt und auf einem OLED Display ange
 
 ![schaltung](./assets/schaltung.jpg)
 
-(LED-Streifen fehlt noch)
-
 ## Ergebnisse
 
 Das Spiel Flappy Bird läuft erfolgreich auf dem Arduino Nano und wird klar auf dem OLED Display dargestellt. Die Steuerung funktioniert über Knöpfe einwandfrei. Die Bluetooth-Verbindung zur Roboremo-App war jedoch unzuverlässig. Der LED-Streifen reagiert zuverlässig auf Spielereignisse.
