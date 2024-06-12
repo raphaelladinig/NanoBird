@@ -1,7 +1,6 @@
 #include "Adafruit_NeoPixel.h"
 #include "Adafruit_SSD1306.h"
 #include "HardwareSerial.h"
-#include "SoftwareSerial.h"
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <SPI.h>
@@ -9,21 +8,7 @@
 
 int bPin = 2;
 
-SoftwareSerial bt(10, 0);
-struct Signal {
-    char id;
-    int value;
-};
-char btChar = ' ';
-char btId = ' ';
-char btIdTemp = ' ';
-bool btIdExpected = true;
-bool btNewReading = false;
-String btValueString = "";
-float btValue;
-Signal btQuery();
-
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(10, 13, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(30, 10, NEO_GRB + NEO_KHZ800);
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 void text(int y, String txt);
 void wipe();
@@ -69,7 +54,6 @@ const int wall_gap = 40;
 const int wall_width = 10;
 
 void setup() {
-    bt.begin(9600);
     Serial.begin(9600);
     strip.begin();
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
@@ -80,12 +64,12 @@ void setup() {
 }
 
 void loop() {
-    Signal s = btQuery();
     if (state == 0) {
-        setColor(strip.Color(0, 255, 0));
         display.clearDisplay();
 
-        if ((s.id == 'b' && s.value == 0) || digitalRead(bPin) == LOW) {
+        setColor(strip.Color(0, 255, 0));
+
+        if (digitalRead(bPin) == LOW) {
             bird.speed += 4;
         } else {
             bird.speed -= 2;
@@ -138,6 +122,7 @@ void loop() {
         delay(25);
     } else if (state == 1) {
         wipe();
+
         setColor(strip.Color(255, 0, 0));
         text(0, "Game Over!");
         text(10, "Score: " + String(score));
@@ -145,6 +130,7 @@ void loop() {
             high_score = score;
             EEPROM.write(0, high_score);
             text(20, "New High Score!");
+            setColor(strip.Color(0, 0, 255));
         } else {
             text(20, "High Score: " + String(high_score));
         }
@@ -167,40 +153,6 @@ void loop() {
             ;
         state = 0;
     }
-    if ((timeout + 50) < millis()) {
-        strip.show();
-        timeout = millis();
-    }
-}
-
-Signal btQuery() {
-    Signal result = {0, 0};
-
-    btNewReading = false;
-    if (bt.available()) {
-        btChar = bt.read();
-        if (btIdExpected) {
-            btIdTemp = btChar;
-            btIdExpected = false;
-            btValueString = "";
-        } else {
-            if ((btChar != ' ') && (btChar != '\n')) {
-                btValueString += btChar;
-            }
-            if (btChar == '\n') {
-                result.id = btIdTemp;
-                result.value = btValueString.toFloat();
-                Serial.print(result.id);
-                Serial.print(" ");
-                Serial.println(result.value);
-                btValueString = "";
-                btIdExpected = true;
-                btNewReading = true;
-            }
-        }
-    }
-
-    return result;
 }
 
 void text(int y, String txt) {
@@ -235,4 +187,9 @@ void setColor(uint32_t color) {
     for (int i = 0; i < strip.numPixels(); i++) {
         strip.setPixelColor(i, color);
     }
+    strip.show();
+    // if ((timeout + 50) < millis()) {
+    //     strip.show();
+    //     timeout = millis();
+    // }
 }
