@@ -1,6 +1,7 @@
 #include "Adafruit_NeoPixel.h"
 #include "Adafruit_SSD1306.h"
 #include "HardwareSerial.h"
+#include "SoftwareSerial.h"
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <SPI.h>
@@ -8,8 +9,24 @@
 
 int bPin = 2;
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(30, 10, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(30, 5, NEO_GRB + NEO_KHZ800);
+
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
+
+// SoftwareSerial bt(10, 11);
+struct Signal {
+    char id;
+    int value;
+};
+char btChar = ' ';
+char btId = ' ';
+char btIdTemp = ' ';
+bool btIdExpected = true;
+bool btNewReading = false;
+String btValueString = "";
+float btValue;
+Signal btQuery();
+
 void text(int y, String txt);
 void wipe();
 void initalize();
@@ -69,7 +86,8 @@ void loop() {
 
         setColor(strip.Color(0, 255, 0));
 
-        if (digitalRead(bPin) == LOW) {
+        Signal s = btQuery();
+        if ((s.id == 'b' && s.value == 0) || digitalRead(bPin) == LOW) {
             bird.speed += 4;
         } else {
             bird.speed -= 2;
@@ -190,4 +208,34 @@ void setColor(uint32_t color) {
         strip.setPixelColor(i, color);
     }
     strip.show();
+}
+
+Signal btQuery() {
+    Signal result = {0, 0};
+
+    // btNewReading = false;
+    // if (bt.available()) {
+    //     btChar = bt.read();
+    //     if (btIdExpected) {
+    //         btIdTemp = btChar;
+    //         btIdExpected = false;
+    //         btValueString = "";
+    //     } else {
+    //         if ((btChar != ' ') && (btChar != '\n')) {
+    //             btValueString += btChar;
+    //         }
+    //         if (btChar == '\n') {
+    //             result.id = btIdTemp;
+    //             result.value = btValueString.toFloat();
+    //             Serial.print(result.id);
+    //             Serial.print(" ");
+    //             Serial.println(result.value);
+    //             btValueString = "";
+    //             btIdExpected = true;
+    //             btNewReading = true;
+    //         }
+    //     }
+    // }
+
+    return result;
 }
