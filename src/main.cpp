@@ -88,7 +88,7 @@ void loop() {
 
         Signal s = btQuery();
         if ((s.id == 'b' && s.value == 0) || digitalRead(bPin) == LOW) {
-            bird.speed += 4;
+            bird.speed = 4;
         } else {
             bird.speed -= 2;
         }
